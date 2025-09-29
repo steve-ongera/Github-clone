@@ -809,7 +809,7 @@ def organization_create(request):
         messages.success(request, f'Organization {name} created successfully!')
         return redirect('organization_detail', org_name=name)
     
-    return render(request, 'orgs/organization_create.html', context)
+    return render(request, 'orgs/organization_create.html')
 
 
 # ============================================================================

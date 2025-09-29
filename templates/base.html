@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}GitHub Clone{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            line-height: 1.5;
+        }
+        
+        /* Header */
+        header {
+            background-color: #161b22;
+            border-bottom: 1px solid #30363d;
+            padding: 16px 32px;
+        }
+        
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-decoration: none;
+        }
+        
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+        }
+        
+        .search-bar input {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+        }
+        
+        .search-bar input:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        
+        nav {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-left: auto;
+        }
+        
+        nav a {
+            color: #c9d1d9;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        nav a:hover {
+            color: #58a6ff;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid;
+            display: inline-block;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #238636;
+            color: #fff;
+            border-color: #238636;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2ea043;
+        }
+        
+        .btn-secondary {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border-color: #30363d;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #30363d;
+        }
+        
+        .btn-danger {
+            background-color: #da3633;
+            color: #fff;
+            border-color: #da3633;
+        }
+        
+        .btn-danger:hover {
+            background-color: #e5534b;
+        }
+        
+        /* Main Content */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 24px 32px;
+        }
+        
+        .container-sm {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px 32px;
+        }
+        
+        /* Messages */
+        .messages {
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            border: 1px solid;
+        }
+        
+        .alert-success {
+            background-color: #0f2f1f;
+            color: #56d364;
+            border-color: #238636;
+        }
+        
+        .alert-error {
+            background-color: #2d1519;
+            color: #f85149;
+            border-color: #da3633;
+        }
+        
+        .alert-info {
+            background-color: #0c2d6b;
+            color: #58a6ff;
+            border-color: #1f6feb;
+        }
+        
+        /* Cards */
+        .card {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .card-header {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        /* Forms */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="url"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: #0d1117;
+            border: 1px solid #30363d;
+            border-radius: 6px;
+            color: #c9d1d9;
+            font-size: 14px;
+            font-family: inherit;
+        }
+        
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #58a6ff;
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        /* Links */
+        a {
+            color: #58a6ff;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Lists */
+        .list-group {
+            list-style: none;
+        }
+        
+        .list-item {
+            padding: 16px;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #30363d;
+        }
+        
+        th {
+            font-weight: 600;
+            color: #8b949e;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #30363d;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 12px 16px;
+            color: #8b949e;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        
+        .tab:hover {
+            color: #c9d1d9;
+            text-decoration: none;
+        }
+        
+        .tab.active {
+            color: #c9d1d9;
+            border-bottom-color: #f78166;
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin: 16px 0;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: #8b949e;
+            font-size: 14px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: #c9d1d9;
+        }
+        
+        /* Footer */
+        footer {
+            border-top: 1px solid #30363d;
+            padding: 40px 32px;
+            margin-top: 60px;
+            text-align: center;
+            color: #8b949e;
+            font-size: 12px;
+        }
+        
+        /* Utility Classes */
+        .text-muted {
+            color: #8b949e;
+        }
+        
+        .text-small {
+            font-size: 12px;
+        }
+        
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+        .mt-3 { margin-top: 24px; }
+        .mb-1 { margin-bottom: 8px; }
+        .mb-2 { margin-bottom: 16px; }
+        .mb-3 { margin-bottom: 24px; }
+        
+        .flex {
+            display: flex;
+        }
+        
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .flex-gap {
+            gap: 12px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                flex-wrap: wrap;
+            }
+            
+            .search-bar {
+                order: 3;
+                width: 100%;
+                max-width: 100%;
+            }
+            
+            .container {
+                padding: 16px;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <a href="{% url 'home' %}" class="logo">GitHub</a>
+            
+            <div class="search-bar">
+                <form action="{% url 'search' %}" method="get">
+                    <input type="text" name="q" placeholder="Search or jump to..." value="{{ request.GET.q }}">
+                </form>
+            </div>
+            
+            <nav>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'explore' %}">Explore</a>
+                    <a href="{% url 'notifications' %}">Notifications</a>
+                    <a href="{% url 'profile' user.username %}">Profile</a>
+                    <a href="{% url 'repo_create' %}" class="btn btn-primary">New</a>
+                    <a href="{% url 'settings' %}">Settings</a>
+                    <a href="{% url 'logout' %}">Logout</a>
+                {% else %}
+                    <a href="{% url 'explore' %}">Explore</a>
+                    <a href="{% url 'login' %}">Sign in</a>
+                    <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+    
+    <main>
+        <div class="{% block container_class %}container{% endblock %}">
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2025 GitHub Clone. All rights reserved.</p>
+    </footer>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

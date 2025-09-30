@@ -1,0 +1,606 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ profile_user.username }} - Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #0d1117;
+        color: #c9d1d9;
+    }
+    
+    .profile-header {
+        background-color: #0d1117;
+        padding: 32px 0;
+    }
+    
+    .profile-avatar {
+        width: 280px;
+        height: 280px;
+        border-radius: 50%;
+        border: 1px solid #30363d;
+    }
+    
+    .profile-bio {
+        background-color: #0d1117;
+    }
+    
+    .profile-name {
+        font-size: 26px;
+        font-weight: 600;
+        color: #c9d1d9;
+    }
+    
+    .profile-username {
+        font-size: 20px;
+        color: #8b949e;
+        font-weight: 300;
+    }
+    
+    .profile-stats {
+        display: flex;
+        gap: 16px;
+        margin: 16px 0;
+    }
+    
+    .profile-stat-item {
+        color: #8b949e;
+        text-decoration: none;
+        font-size: 14px;
+    }
+    
+    .profile-stat-item:hover {
+        color: #58a6ff;
+    }
+    
+    .profile-stat-item strong {
+        color: #c9d1d9;
+        font-weight: 600;
+    }
+    
+    .tab-nav {
+        border-bottom: 1px solid #21262d;
+        margin-bottom: 24px;
+        display: flex;
+        gap: 16px;
+    }
+    
+    .tab-nav-item {
+        padding: 16px 0;
+        color: #8b949e;
+        text-decoration: none;
+        border-bottom: 2px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .tab-nav-item.active {
+        color: #c9d1d9;
+        border-bottom-color: #f78166;
+    }
+    
+    .tab-nav-item:hover {
+        color: #c9d1d9;
+        border-bottom-color: #30363d;
+    }
+    
+    .repo-card {
+        background-color: #0d1117;
+        border: 1px solid #30363d;
+        border-radius: 6px;
+        padding: 16px;
+        margin-bottom: 16px;
+        transition: border-color 0.2s;
+    }
+    
+    .repo-card:hover {
+        border-color: #8b949e;
+    }
+    
+    .repo-name {
+        color: #58a6ff;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .repo-name:hover {
+        text-decoration: underline;
+    }
+    
+    .repo-description {
+        color: #8b949e;
+        font-size: 14px;
+        margin: 8px 0;
+    }
+    
+    .repo-meta {
+        display: flex;
+        gap: 16px;
+        font-size: 12px;
+        color: #8b949e;
+    }
+    
+    .repo-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .language-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    
+    .contribution-graph {
+        background-color: #0d1117;
+        border: 1px solid #21262d;
+        border-radius: 6px;
+        padding: 20px;
+        margin: 24px 0;
+    }
+    
+    .contribution-graph h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        color: #c9d1d9;
+    }
+    
+    .calendar-graph {
+        display: flex;
+        gap: 3px;
+        overflow-x: auto;
+    }
+    
+    .calendar-week {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+    }
+    
+    .calendar-day {
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+        background-color: #161b22;
+        border: 1px solid #1b1f23;
+        position: relative;
+    }
+    
+    .calendar-day[data-level="1"] { background-color: #0e4429; }
+    .calendar-day[data-level="2"] { background-color: #006d32; }
+    .calendar-day[data-level="3"] { background-color: #26a641; }
+    .calendar-day[data-level="4"] { background-color: #39d353; }
+    
+    .calendar-day:hover {
+        border-color: #8b949e;
+    }
+    
+    .contribution-legend {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #8b949e;
+        margin-top: 16px;
+        justify-content: flex-end;
+    }
+    
+    .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .activity-section {
+        margin-top: 24px;
+    }
+    
+    .activity-item {
+        padding: 16px 0;
+        border-bottom: 1px solid #21262d;
+        display: flex;
+        gap: 16px;
+    }
+    
+    .activity-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .activity-content h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #c9d1d9;
+    }
+    
+    .activity-meta {
+        font-size: 12px;
+        color: #8b949e;
+    }
+    
+    .language-stats {
+        background-color: #0d1117;
+        border: 1px solid #21262d;
+        border-radius: 6px;
+        padding: 16px;
+        margin-top: 24px;
+    }
+    
+    .language-stats h3 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+    }
+    
+    .language-bar {
+        display: flex;
+        height: 8px;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+    
+    .language-segment {
+        height: 100%;
+    }
+    
+    .language-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .language-item {
+        display: flex;
+        justify-content: space-between;
+        font-size: 12px;
+        color: #8b949e;
+    }
+    
+    .language-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-edit-profile {
+        background-color: #21262d;
+        color: #c9d1d9;
+        border: 1px solid #30363d;
+        padding: 5px 16px;
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .btn-edit-profile:hover {
+        background-color: #30363d;
+        color: #c9d1d9;
+    }
+    
+    .pinned-repos-header {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 24px 0 16px;
+        color: #c9d1d9;
+    }
+    
+    .repo-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+    
+    .badge-public {
+        background-color: #21262d;
+        color: #8b949e;
+        border: 1px solid #30363d;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .organizations {
+        margin-top: 24px;
+    }
+    
+    .org-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: 1px solid #30363d;
+    }
+    
+    @media (max-width: 768px) {
+        .repo-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="container-fluid" style="max-width: 1280px;">
+    <div class="row profile-header">
+        <!-- Left Sidebar - Profile Info -->
+        <div class="col-md-3">
+            <div class="text-center mb-4">
+                {% if profile_user.avatar %}
+                <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" class="profile-avatar">
+                {% else %}
+                <img src="{% static 'img/default-avatar.png' %}" alt="{{ profile_user.username }}" class="profile-avatar">
+                {% endif %}
+            </div>
+            
+            <div class="profile-bio">
+                <h1 class="profile-name">{{ profile_user.first_name }} {{ profile_user.last_name }}</h1>
+                <p class="profile-username">{{ profile_user.username }}</p>
+                
+                <a href="#" class="btn-edit-profile w-100 text-center mt-3 d-block">Edit profile</a>
+                
+                {% if profile_user.bio %}
+                <p class="mt-3" style="font-size: 14px;">{{ profile_user.bio }}</p>
+                {% endif %}
+                
+                <div class="profile-stats mt-3">
+                    <a href="#" class="profile-stat-item">
+                        <i class="bi bi-people"></i>
+                        <strong>{{ profile_user.followers_count }}</strong> followers
+                    </a>
+                    <span class="text-muted">·</span>
+                    <a href="#" class="profile-stat-item">
+                        <strong>{{ profile_user.following_count }}</strong> following
+                    </a>
+                </div>
+                
+                <div class="mt-3" style="font-size: 14px; color: #8b949e;">
+                    {% if profile_user.company %}
+                    <div class="mb-2">
+                        <i class="bi bi-building"></i> {{ profile_user.company }}
+                    </div>
+                    {% endif %}
+                    {% if profile_user.location %}
+                    <div class="mb-2">
+                        <i class="bi bi-geo-alt"></i> {{ profile_user.location }}
+                    </div>
+                    {% endif %}
+                    {% if profile_user.email %}
+                    <div class="mb-2">
+                        <i class="bi bi-envelope"></i> {{ profile_user.email }}
+                    </div>
+                    {% endif %}
+                    {% if profile_user.website %}
+                    <div class="mb-2">
+                        <i class="bi bi-link-45deg"></i>
+                        <a href="{{ profile_user.website }}" target="_blank" style="color: #58a6ff;">{{ profile_user.website }}</a>
+                    </div>
+                    {% endif %}
+                    {% if profile_user.twitter_username %}
+                    <div class="mb-2">
+                        <i class="bi bi-twitter"></i>
+                        <a href="https://twitter.com/{{ profile_user.twitter_username }}" target="_blank" style="color: #58a6ff;">@{{ profile_user.twitter_username }}</a>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if organizations %}
+                <div class="organizations">
+                    <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Organizations</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for org_member in organizations %}
+                        <a href="{% url 'organization_detail' org_member.organization.name %}">
+                            {% if org_member.organization.avatar %}
+                            <img src="{{ org_member.organization.avatar.url }}" alt="{{ org_member.organization.name }}" class="org-avatar">
+                            {% else %}
+                            <div class="org-avatar d-flex align-items-center justify-content-center" style="background-color: #30363d;">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            {% endif %}
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="col-md-9">
+            <!-- Navigation Tabs -->
+            <div class="tab-nav">
+                <a href="#" class="tab-nav-item active">
+                    <i class="bi bi-book"></i>
+                    Overview
+                </a>
+                <a href="#" class="tab-nav-item">
+                    <i class="bi bi-folder"></i>
+                    Repositories
+                    <span class="badge-public">{{ profile_user.public_repos_count }}</span>
+                </a>
+                <a href="#" class="tab-nav-item">
+                    <i class="bi bi-diagram-3"></i>
+                    Projects
+                </a>
+                <a href="#" class="tab-nav-item">
+                    <i class="bi bi-box"></i>
+                    Packages
+                </a>
+                <a href="#" class="tab-nav-item">
+                    <i class="bi bi-star"></i>
+                    Stars
+                    <span class="badge-public">{{ starred_count }}</span>
+                </a>
+            </div>
+            
+            <!-- Pinned Repositories -->
+            <h2 class="pinned-repos-header">Pinned</h2>
+            <div class="repo-grid">
+                {% for repo in user_repos %}
+                <div class="repo-card">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <a href="{% url 'repository_detail' repo.owner.username repo.name %}" class="repo-name">
+                            <i class="bi bi-book"></i>
+                            {{ repo.name }}
+                        </a>
+                        <span class="badge-public">
+                            {% if repo.visibility == 'public' %}
+                            <i class="bi bi-unlock"></i> Public
+                            {% else %}
+                            <i class="bi bi-lock"></i> Private
+                            {% endif %}
+                        </span>
+                    </div>
+                    
+                    {% if repo.description %}
+                    <p class="repo-description">{{ repo.description|truncatewords:15 }}</p>
+                    {% endif %}
+                    
+                    <div class="repo-meta">
+                        {% if repo.language %}
+                        <span class="repo-meta-item">
+                            <span class="language-dot" style="background-color: {% if repo.language == 'Python' %}#3572A5{% elif repo.language == 'JavaScript' %}#f1e05a{% elif repo.language == 'Java' %}#b07219{% elif repo.language == 'HTML' %}#e34c26{% elif repo.language == 'CSS' %}#563d7c{% else %}#858585{% endif %};"></span>
+                            {{ repo.language }}
+                        </span>
+                        {% endif %}
+                        {% if repo.stars_count > 0 %}
+                        <span class="repo-meta-item">
+                            <i class="bi bi-star"></i> {{ repo.stars_count }}
+                        </span>
+                        {% endif %}
+                        {% if repo.forks_count > 0 %}
+                        <span class="repo-meta-item">
+                            <i class="bi bi-diagram-2"></i> {{ repo.forks_count }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center text-muted py-5">
+                    <i class="bi bi-inbox display-4"></i>
+                    <p class="mt-3">No pinned repositories yet</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Contribution Graph -->
+            <div class="contribution-graph">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3>{{ year_contributions }} contributions in {{ current_year }}</h3>
+                    <div class="contribution-legend">
+                        <span>Less</span>
+                        <div class="calendar-day" data-level="0"></div>
+                        <div class="calendar-day" data-level="1"></div>
+                        <div class="calendar-day" data-level="2"></div>
+                        <div class="calendar-day" data-level="3"></div>
+                        <div class="calendar-day" data-level="4"></div>
+                        <span>More</span>
+                    </div>
+                </div>
+                
+                <div class="calendar-graph">
+                    {% for week in calendar_weeks %}
+                    <div class="calendar-week">
+                        {% for day in week %}
+                        <div class="calendar-day" 
+                             data-level="{{ day.level }}" 
+                             title="{{ day.count }} contributions on {{ day.date }}">
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Language Statistics -->
+            {% if language_percentages %}
+            <div class="language-stats">
+                <h3>Most Used Languages</h3>
+                <div class="language-bar">
+                    {% for lang_data in language_percentages %}
+                    <div class="language-segment" 
+                         style="width: {{ lang_data.percentage }}%; background-color: {% if lang_data.language == 'Python' %}#3572A5{% elif lang_data.language == 'JavaScript' %}#f1e05a{% elif lang_data.language == 'Java' %}#b07219{% elif lang_data.language == 'HTML' %}#e34c26{% elif lang_data.language == 'CSS' %}#563d7c{% else %}#858585{% endif %};">
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="language-list">
+                    {% for lang_data in language_percentages %}
+                    <div class="language-item">
+                        <span class="language-name">
+                            <span class="language-dot" style="background-color: {% if lang_data.language == 'Python' %}#3572A5{% elif lang_data.language == 'JavaScript' %}#f1e05a{% elif lang_data.language == 'Java' %}#b07219{% elif lang_data.language == 'HTML' %}#e34c26{% elif lang_data.language == 'CSS' %}#563d7c{% else %}#858585{% endif %};"></span>
+                            {{ lang_data.language }}
+                        </span>
+                        <span>{{ lang_data.percentage }}%</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Activity Feed -->
+            <div class="activity-section">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px;">Contribution activity</h3>
+                
+                {% for activity in recent_activity %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        {% if activity.event_type == 'push' %}
+                        <i class="bi bi-git" style="color: #8b949e;"></i>
+                        {% elif activity.event_type == 'star' %}
+                        <i class="bi bi-star-fill" style="color: #f1e05a;"></i>
+                        {% elif activity.event_type == 'fork' %}
+                        <i class="bi bi-diagram-2" style="color: #8b949e;"></i>
+                        {% elif activity.event_type == 'create' %}
+                        <i class="bi bi-repo" style="color: #8b949e;"></i>
+                        {% elif activity.event_type == 'pull_request' %}
+                        <i class="bi bi-git-pull-request" style="color: #3fb950;"></i>
+                        {% elif activity.event_type == 'issue' %}
+                        <i class="bi bi-exclamation-circle" style="color: #3fb950;"></i>
+                        {% endif %}
+                    </div>
+                    <div class="activity-content flex-grow-1">
+                        <h4>
+                            {% if activity.event_type == 'push' %}
+                            Pushed to
+                            {% elif activity.event_type == 'star' %}
+                            Starred
+                            {% elif activity.event_type == 'fork' %}
+                            Forked
+                            {% elif activity.event_type == 'create' %}
+                            Created repository
+                            {% elif activity.event_type == 'pull_request' %}
+                            Opened a pull request in
+                            {% elif activity.event_type == 'issue' %}
+                            Opened an issue in
+                            {% endif %}
+                            {% if activity.repository %}
+                            <a href="{% url 'repository_detail' activity.repository.owner.username activity.repository.name %}" style="color: #58a6ff;">
+                                {{ activity.repository.owner.username }}/{{ activity.repository.name }}
+                            </a>
+                            {% endif %}
+                        </h4>
+                        <p class="activity-meta">{{ activity.created_at|date:"M d, Y" }}</p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted text-center py-4">No recent activity</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

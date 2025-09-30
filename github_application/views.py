@@ -37,42 +37,131 @@ def home(request):
     return render(request, 'home.html', context)
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Q, Sum
+from datetime import datetime, timedelta
+from collections import defaultdict
+import calendar
+
 @login_required
 def dashboard(request):
-    """User dashboard with personalized feed"""
-    # Get user's repositories
-    user_repos = Repository.objects.filter(owner=request.user).order_by('-updated_at')[:5]
+    """User dashboard with GitHub-style profile"""
+    user = request.user
     
-    # Get repositories from followed users
-    following_ids = request.user.following.values_list('following_id', flat=True)
-    following_activity = Activity.objects.filter(
-        user_id__in=following_ids,
-        public=True
-    ).select_related('user', 'repository').order_by('-created_at')[:20]
+    # Get user's repositories (pinned/featured ones first)
+    user_repos = Repository.objects.filter(owner=user).order_by('-stars_count', '-updated_at')[:6]
     
-    # Get user's recent activity
-    user_activity = Activity.objects.filter(
-        user=request.user
-    ).select_related('repository').order_by('-created_at')[:10]
+    # Get all user repositories for stats
+    all_repos = Repository.objects.filter(owner=user)
     
-    # Get starred repositories
-    starred_repos = Repository.objects.filter(
-        stars__user=request.user
-    ).order_by('-stars__created_at')[:5]
+    # Calculate language statistics
+    language_stats = {}
+    total_size = 0
     
-    # Get unread notifications
-    notifications = Notification.objects.filter(
-        user=request.user,
-        unread=True
-    ).order_by('-created_at')[:10]
+    for repo in all_repos:
+        if repo.language:
+            if repo.language not in language_stats:
+                language_stats[repo.language] = 0
+            language_stats[repo.language] += repo.size
+            total_size += repo.size
+    
+    # Convert to percentages
+    language_percentages = []
+    if total_size > 0:
+        for lang, size in sorted(language_stats.items(), key=lambda x: x[1], reverse=True):
+            percentage = (size / total_size) * 100
+            language_percentages.append({
+                'language': lang,
+                'percentage': round(percentage, 1)
+            })
+    
+    # Get contribution data for the last year
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+    
+    # Get all activities in the date range
+    activities = Activity.objects.filter(
+        user=user,
+        created_at__gte=start_date,
+        created_at__lte=end_date
+    ).extra(select={'date': 'DATE(created_at)'}).values('date').annotate(count=Count('id'))
+    
+    # Create contribution calendar data
+    contribution_data = defaultdict(int)
+    for activity in activities:
+        contribution_data[str(activity['date'])] = activity['count']
+    
+    # Generate calendar grid (52 weeks)
+    calendar_weeks = []
+    current_date = end_date
+    
+    for week in range(52):
+        week_data = []
+        for day in range(7):
+            date_str = current_date.strftime('%Y-%m-%d')
+            count = contribution_data.get(date_str, 0)
+            
+            # Determine contribution level (0-4)
+            if count == 0:
+                level = 0
+            elif count <= 3:
+                level = 1
+            elif count <= 6:
+                level = 2
+            elif count <= 9:
+                level = 3
+            else:
+                level = 4
+            
+            week_data.append({
+                'date': date_str,
+                'count': count,
+                'level': level,
+                'month': current_date.strftime('%b') if current_date.day <= 7 and day == 0 else ''
+            })
+            current_date -= timedelta(days=1)
+        
+        calendar_weeks.insert(0, week_data)
+    
+    # Calculate total contributions
+    total_contributions = sum(contribution_data.values())
+    
+    # Get recent activity for the feed
+    recent_activity = Activity.objects.filter(
+        user=user
+    ).select_related('repository').order_by('-created_at')[:20]
+    
+    # Get contribution stats
+    current_year = datetime.now().year
+    year_start = datetime(current_year, 1, 1)
+    
+    year_contributions = Activity.objects.filter(
+        user=user,
+        created_at__gte=year_start
+    ).count()
+    
+    # Get starred repositories count
+    starred_count = Star.objects.filter(user=user).count()
+    
+    # Get organization memberships
+    organizations = OrganizationMember.objects.filter(
+        user=user
+    ).select_related('organization')[:10]
     
     context = {
+        'profile_user': user,
         'user_repos': user_repos,
-        'following_activity': following_activity,
-        'user_activity': user_activity,
-        'starred_repos': starred_repos,
-        'notifications': notifications,
+        'language_percentages': language_percentages,
+        'calendar_weeks': calendar_weeks,
+        'total_contributions': total_contributions,
+        'year_contributions': year_contributions,
+        'recent_activity': recent_activity,
+        'starred_count': starred_count,
+        'organizations': organizations,
+        'current_year': current_year,
     }
+    
     return render(request, 'dashboard.html', context)
 
 

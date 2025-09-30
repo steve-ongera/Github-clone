@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block title %}Issues · {{ repo.owner.username }}/{{ repo.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-between flex-center mb-3">
+    <div>
+        <h2><a href="{% url 'repo_detail' repo.owner.username repo.name %}">{{ repo.owner.username }}/{{ repo.name }}</a></h2>
+    </div>
+</div>
+
+<div class="tabnav">
+    <a href="{% url 'repo_detail' repo.owner.username repo.name %}" class="tabnav-tab">
+        <i class="bi bi-code-slash"></i>
+        Code
+    </a>
+    <a href="{% url 'issue_list' repo.owner.username repo.name %}" class="tabnav-tab selected">
+        <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+        Issues
+        <span class="counter">{{ repo.open_issues_count }}</span>
+    </a>
+    <a href="{% url 'pr_list' repo.owner.username repo.name %}" class="tabnav-tab">
+        <i class="bi bi-git"></i>
+        Pull requests
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-header d-flex flex-between flex-center">
+        <div class="d-flex gap-2">
+            <a href="?state=open" class="btn btn-sm {% if current_state == 'open' %}btn-primary{% else %}btn-secondary{% endif %}">
+                <i class="bi bi-circle-fill" style="font-size: 8px;"></i>
+                Open
+            </a>
+            <a href="?state=closed" class="btn btn-sm {% if current_state == 'closed' %}btn-primary{% else %}btn-secondary{% endif %}">
+                <i class="bi bi-check2"></i>
+                Closed
+            </a>
+        </div>
+        
+        {% if user.is_authenticated %}
+        <a href="{% url 'issue_create' repo.owner.username repo.name %}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i>
+            New issue
+        </a>
+        {% endif %}
+    </div>
+    
+    <div class="list-group">
+        {% for issue in issues %}
+        <div class="list-item">
+            <div style="flex: 1;">
+                <div class="d-flex flex-center gap-2 mb-1">
+                    {% if issue.state == 'open' %}
+                    <i class="bi bi-circle-fill" style="font-size: 12px; color: #3fb950;"></i>
+                    {% else %}
+                    <i class="bi bi-check-circle-fill" style="font-size: 12px; color: #a371f7;"></i>
+                    {% endif %}
+                    <a href="{% url 'issue_detail' repo.owner.username repo.name issue.number %}" class="text-bold">
+                        {{ issue.title }}
+                    </a>
+                    {% for label in issue.issue_labels.all %}
+                    <span class="label" style="background-color: #{{ label.label.color }}22; border-color: #{{ label.label.color }};">
+                        {{ label.label.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                <div class="text-muted text-small">
+                    #{{ issue.number }} opened {{ issue.created_at|timesince }} ago by 
+                    <a href="{% url 'profile' issue.author.username %}">{{ issue.author.username }}</a>
+                    {% if issue.comments_count > 0 %}
+                    · <i class="bi bi-chat-left"></i> {{ issue.comments_count }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="list-item text-center">
+            <div style="padding: 40px;">
+                <i class="bi bi-check-circle" style="font-size: 48px; color: var(--color-fg-muted);"></i>
+                <h3 class="mt-3">No {% if current_state == 'open' %}open{% else %}closed{% endif %} issues</h3>
+                <p class="text-muted">
+                    {% if current_state == 'open' %}
+                    Great job! All issues are closed.
+                    {% else %}
+                    No closed issues yet.
+                    {% endif %}
+                </p>
+                {% if user.is_authenticated and current_state == 'open' %}
+                <a href="{% url 'issue_create' repo.owner.username repo.name %}" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-lg"></i>
+                    Create your first issue
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if issues.has_other_pages %}
+<div class="d-flex flex-between flex-center mt-3">
+    <div>
+        {% if issues.has_previous %}
+        <a href="?page={{ issues.previous_page_number }}&state={{ current_state }}" class="btn btn-secondary">
+            <i class="bi bi-chevron-left"></i>
+            Previous
+        </a>
+        {% endif %}
+    </div>
+    <div class="text-muted">
+        Page {{ issues.number }} of {{ issues.paginator.num_pages }}
+    </div>
+    <div>
+        {% if issues.has_next %}
+        <a href="?page={{ issues.next_page_number }}&state={{ current_state }}" class="btn btn-secondary">
+            Next
+            <i class="bi bi-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

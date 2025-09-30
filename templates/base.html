@@ -1,10 +1,36 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-color-mode="dark" data-dark-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}GitHub Clone{% endblock %}</title>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <style>
+        :root {
+            --color-canvas-default: #0d1117;
+            --color-canvas-subtle: #161b22;
+            --color-border-default: #30363d;
+            --color-border-muted: #21262d;
+            --color-fg-default: #e6edf3;
+            --color-fg-muted: #7d8590;
+            --color-fg-subtle: #6e7681;
+            --color-accent-fg: #2f81f7;
+            --color-accent-emphasis: #1f6feb;
+            --color-success-emphasis: #238636;
+            --color-danger-emphasis: #da3633;
+            --color-attention-emphasis: #9e6a03;
+            --color-btn-bg: #21262d;
+            --color-btn-border: #30363d;
+            --color-btn-hover-bg: #30363d;
+            --color-btn-primary-bg: #238636;
+            --color-btn-primary-hover-bg: #2ea043;
+            --color-btn-danger-bg: #da3633;
+            --color-btn-danger-hover-bg: #e5534b;
+        }
+        
         * {
             margin: 0;
             padding: 0;
@@ -12,20 +38,24 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: #0d1117;
-            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+            background-color: var(--color-canvas-default);
+            color: var(--color-fg-default);
             line-height: 1.5;
+            font-size: 14px;
         }
         
         /* Header */
-        header {
-            background-color: #161b22;
-            border-bottom: 1px solid #30363d;
-            padding: 16px 32px;
+        .header {
+            background-color: var(--color-canvas-subtle);
+            border-bottom: 1px solid var(--color-border-default);
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
-        .header-content {
+        .header-container {
             max-width: 1280px;
             margin: 0 auto;
             display: flex;
@@ -33,151 +63,224 @@
             gap: 16px;
         }
         
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: #fff;
+        .header-logo {
+            display: flex;
+            align-items: center;
+            color: var(--color-fg-default);
             text-decoration: none;
+            font-size: 20px;
         }
         
-        .search-bar {
+        .header-logo i {
+            font-size: 32px;
+        }
+        
+        .header-search {
             flex: 1;
             max-width: 400px;
         }
         
-        .search-bar input {
+        .header-search input {
             width: 100%;
-            padding: 8px 12px;
-            background-color: #0d1117;
-            border: 1px solid #30363d;
+            padding: 5px 12px;
+            background-color: var(--color-canvas-default);
+            border: 1px solid var(--color-border-default);
             border-radius: 6px;
-            color: #c9d1d9;
+            color: var(--color-fg-default);
             font-size: 14px;
+            transition: all 0.2s;
         }
         
-        .search-bar input:focus {
+        .header-search input:focus {
             outline: none;
-            border-color: #58a6ff;
+            border-color: var(--color-accent-emphasis);
+            background-color: var(--color-canvas-subtle);
         }
         
-        nav {
+        .header-search input::placeholder {
+            color: var(--color-fg-muted);
+        }
+        
+        .header-nav {
             display: flex;
-            gap: 20px;
+            gap: 16px;
             align-items: center;
             margin-left: auto;
         }
         
-        nav a {
-            color: #c9d1d9;
+        .header-nav-link {
+            color: var(--color-fg-default);
             text-decoration: none;
-            font-size: 14px;
             font-weight: 600;
-        }
-        
-        nav a:hover {
-            color: #58a6ff;
-        }
-        
-        .btn {
-            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
             border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+        
+        .header-nav-link:hover {
+            background-color: var(--color-btn-hover-bg);
             text-decoration: none;
+        }
+        
+        .header-nav-link i {
+            font-size: 16px;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--color-btn-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--color-fg-default);
+            font-weight: 600;
+            font-size: 12px;
+        }
+        
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 5px 16px;
             font-size: 14px;
             font-weight: 500;
+            line-height: 20px;
+            white-space: nowrap;
             cursor: pointer;
             border: 1px solid;
-            display: inline-block;
-            text-align: center;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            text-decoration: none;
+        }
+        
+        .btn-sm {
+            padding: 3px 12px;
+            font-size: 12px;
         }
         
         .btn-primary {
-            background-color: #238636;
             color: #fff;
-            border-color: #238636;
+            background-color: var(--color-btn-primary-bg);
+            border-color: rgba(240,246,252,0.1);
         }
         
         .btn-primary:hover {
-            background-color: #2ea043;
+            background-color: var(--color-btn-primary-hover-bg);
         }
         
         .btn-secondary {
-            background-color: #21262d;
-            color: #c9d1d9;
-            border-color: #30363d;
+            color: var(--color-fg-default);
+            background-color: var(--color-btn-bg);
+            border-color: var(--color-btn-border);
         }
         
         .btn-secondary:hover {
-            background-color: #30363d;
+            background-color: var(--color-btn-hover-bg);
         }
         
         .btn-danger {
-            background-color: #da3633;
             color: #fff;
-            border-color: #da3633;
+            background-color: var(--color-btn-danger-bg);
+            border-color: rgba(240,246,252,0.1);
         }
         
         .btn-danger:hover {
-            background-color: #e5534b;
+            background-color: var(--color-btn-danger-hover-bg);
         }
         
-        /* Main Content */
+        /* Container */
         .container {
             max-width: 1280px;
             margin: 0 auto;
-            padding: 24px 32px;
+            padding: 24px 16px;
         }
         
         .container-sm {
             max-width: 900px;
             margin: 0 auto;
-            padding: 24px 32px;
+            padding: 24px 16px;
         }
         
-        /* Messages */
-        .messages {
-            margin-bottom: 20px;
+        /* Messages/Alerts */
+        .flash-messages {
+            margin-bottom: 16px;
         }
         
         .alert {
-            padding: 12px 16px;
+            padding: 16px;
             border-radius: 6px;
             margin-bottom: 12px;
             border: 1px solid;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+        
+        .alert i {
+            font-size: 16px;
+            margin-top: 2px;
         }
         
         .alert-success {
-            background-color: #0f2f1f;
-            color: #56d364;
-            border-color: #238636;
+            background-color: rgba(35, 134, 54, 0.15);
+            color: #3fb950;
+            border-color: rgba(35, 134, 54, 0.4);
         }
         
-        .alert-error {
-            background-color: #2d1519;
+        .alert-error, .alert-danger {
+            background-color: rgba(248, 81, 73, 0.15);
             color: #f85149;
-            border-color: #da3633;
+            border-color: rgba(248, 81, 73, 0.4);
         }
         
         .alert-info {
-            background-color: #0c2d6b;
+            background-color: rgba(31, 111, 235, 0.15);
             color: #58a6ff;
-            border-color: #1f6feb;
+            border-color: rgba(31, 111, 235, 0.4);
+        }
+        
+        .alert-warning {
+            background-color: rgba(187, 128, 9, 0.15);
+            color: #d29922;
+            border-color: rgba(187, 128, 9, 0.4);
         }
         
         /* Cards */
         .card {
-            background-color: #161b22;
-            border: 1px solid #30363d;
+            background-color: var(--color-canvas-subtle);
+            border: 1px solid var(--color-border-default);
             border-radius: 6px;
-            padding: 16px;
             margin-bottom: 16px;
         }
         
         .card-header {
-            font-size: 16px;
+            padding: 16px;
+            border-bottom: 1px solid var(--color-border-default);
             font-weight: 600;
-            margin-bottom: 12px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid #30363d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .card-body {
+            padding: 16px;
+        }
+        
+        .card-footer {
+            padding: 16px;
+            border-top: 1px solid var(--color-border-default);
+            background-color: rgba(110, 118, 129, 0.05);
         }
         
         /* Forms */
@@ -187,7 +290,7 @@
         
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-weight: 600;
             font-size: 14px;
         }
@@ -196,23 +299,26 @@
         input[type="email"],
         input[type="password"],
         input[type="url"],
+        input[type="number"],
         textarea,
         select {
             width: 100%;
-            padding: 8px 12px;
-            background-color: #0d1117;
-            border: 1px solid #30363d;
+            padding: 5px 12px;
+            background-color: var(--color-canvas-default);
+            border: 1px solid var(--color-border-default);
             border-radius: 6px;
-            color: #c9d1d9;
+            color: var(--color-fg-default);
             font-size: 14px;
             font-family: inherit;
+            line-height: 20px;
         }
         
         input:focus,
         textarea:focus,
         select:focus {
             outline: none;
-            border-color: #58a6ff;
+            border-color: var(--color-accent-emphasis);
+            box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.3);
         }
         
         textarea {
@@ -220,14 +326,59 @@
             min-height: 100px;
         }
         
+        .form-help {
+            font-size: 12px;
+            color: var(--color-fg-muted);
+            margin-top: 6px;
+        }
+        
         /* Links */
         a {
-            color: #58a6ff;
+            color: var(--color-accent-fg);
             text-decoration: none;
         }
         
         a:hover {
             text-decoration: underline;
+        }
+        
+        /* Tabs */
+        .tabnav {
+            display: flex;
+            border-bottom: 1px solid var(--color-border-default);
+            margin-bottom: 24px;
+            gap: 8px;
+        }
+        
+        .tabnav-tab {
+            padding: 8px 16px;
+            color: var(--color-fg-default);
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .tabnav-tab:hover {
+            text-decoration: none;
+            border-bottom-color: var(--color-border-default);
+        }
+        
+        .tabnav-tab.selected {
+            border-bottom-color: #f78166;
+            font-weight: 600;
+        }
+        
+        .counter {
+            display: inline-block;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 1;
+            background-color: rgba(110, 118, 129, 0.2);
+            border-radius: 20px;
         }
         
         /* Lists */
@@ -237,11 +388,67 @@
         
         .list-item {
             padding: 16px;
-            border-bottom: 1px solid #30363d;
+            border-bottom: 1px solid var(--color-border-default);
+            display: flex;
+            gap: 16px;
         }
         
         .list-item:last-child {
             border-bottom: none;
+        }
+        
+        .list-item:hover {
+            background-color: rgba(110, 118, 129, 0.05);
+        }
+        
+        /* Stats */
+        .stats {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--color-fg-muted);
+            font-size: 12px;
+        }
+        
+        .stat a {
+            color: var(--color-fg-muted);
+        }
+        
+        .stat a:hover {
+            color: var(--color-accent-fg);
+        }
+        
+        /* Labels */
+        .label {
+            display: inline-flex;
+            align-items: center;
+            padding: 0 7px;
+            font-size: 12px;
+            font-weight: 500;
+            line-height: 18px;
+            border-radius: 20px;
+            border: 1px solid transparent;
+        }
+        
+        .label-success {
+            color: #3fb950;
+            border-color: rgba(35, 134, 54, 0.4);
+        }
+        
+        .label-danger {
+            color: #f85149;
+            border-color: rgba(248, 81, 73, 0.4);
+        }
+        
+        .label-warning {
+            color: #d29922;
+            border-color: rgba(187, 128, 9, 0.4);
         }
         
         /* Tables */
@@ -251,145 +458,158 @@
         }
         
         th, td {
-            padding: 12px;
+            padding: 8px 16px;
             text-align: left;
-            border-bottom: 1px solid #30363d;
+            border-bottom: 1px solid var(--color-border-default);
         }
         
         th {
             font-weight: 600;
-            color: #8b949e;
             font-size: 12px;
-            text-transform: uppercase;
+            color: var(--color-fg-muted);
         }
         
-        /* Tabs */
-        .tabs {
-            display: flex;
-            gap: 8px;
-            border-bottom: 1px solid #30363d;
-            margin-bottom: 20px;
-        }
-        
-        .tab {
-            padding: 12px 16px;
-            color: #8b949e;
-            text-decoration: none;
-            border-bottom: 2px solid transparent;
-            margin-bottom: -1px;
-        }
-        
-        .tab:hover {
-            color: #c9d1d9;
-            text-decoration: none;
-        }
-        
-        .tab.active {
-            color: #c9d1d9;
-            border-bottom-color: #f78166;
-        }
-        
-        /* Stats */
-        .stats {
-            display: flex;
-            gap: 16px;
-            margin: 16px 0;
-        }
-        
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            color: #8b949e;
-            font-size: 14px;
-        }
-        
-        .stat-value {
-            font-weight: 600;
-            color: #c9d1d9;
+        tr:last-child td {
+            border-bottom: none;
         }
         
         /* Footer */
         footer {
-            border-top: 1px solid #30363d;
-            padding: 40px 32px;
+            border-top: 1px solid var(--color-border-default);
+            padding: 40px 16px;
             margin-top: 60px;
-            text-align: center;
-            color: #8b949e;
+        }
+        
+        .footer-container {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .footer-links {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-links a {
+            color: var(--color-accent-fg);
             font-size: 12px;
         }
         
-        /* Utility Classes */
+        .footer-copyright {
+            color: var(--color-fg-muted);
+            font-size: 12px;
+        }
+        
+        /* Utilities */
         .text-muted {
-            color: #8b949e;
+            color: var(--color-fg-muted);
         }
         
         .text-small {
             font-size: 12px;
         }
         
-        .mt-1 { margin-top: 8px; }
-        .mt-2 { margin-top: 16px; }
-        .mt-3 { margin-top: 24px; }
-        .mb-1 { margin-bottom: 8px; }
-        .mb-2 { margin-bottom: 16px; }
-        .mb-3 { margin-bottom: 24px; }
+        .text-bold {
+            font-weight: 600;
+        }
         
-        .flex {
+        .d-flex {
             display: flex;
+        }
+        
+        .flex-column {
+            flex-direction: column;
         }
         
         .flex-between {
-            display: flex;
             justify-content: space-between;
+        }
+        
+        .flex-center {
             align-items: center;
         }
         
-        .flex-gap {
-            gap: 12px;
-        }
+        .gap-1 { gap: 4px; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 16px; }
+        
+        .mt-0 { margin-top: 0; }
+        .mt-1 { margin-top: 4px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-3 { margin-top: 16px; }
+        .mt-4 { margin-top: 24px; }
+        
+        .mb-0 { margin-bottom: 0; }
+        .mb-1 { margin-bottom: 4px; }
+        .mb-2 { margin-bottom: 8px; }
+        .mb-3 { margin-bottom: 16px; }
+        .mb-4 { margin-bottom: 24px; }
         
         /* Responsive */
         @media (max-width: 768px) {
-            .header-content {
+            .header-container {
                 flex-wrap: wrap;
             }
             
-            .search-bar {
+            .header-search {
                 order: 3;
                 width: 100%;
                 max-width: 100%;
             }
             
-            .container {
-                padding: 16px;
+            .header-nav {
+                gap: 8px;
+            }
+            
+            .header-nav-link span {
+                display: none;
             }
         }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <a href="{% url 'home' %}" class="logo">GitHub</a>
+    <header class="header">
+        <div class="header-container">
+            <a href="{% url 'home' %}" class="header-logo">
+                <i class="bi bi-github"></i>
+            </a>
             
-            <div class="search-bar">
+            <div class="header-search">
                 <form action="{% url 'search' %}" method="get">
                     <input type="text" name="q" placeholder="Search or jump to..." value="{{ request.GET.q }}">
                 </form>
             </div>
             
-            <nav>
+            <nav class="header-nav">
                 {% if user.is_authenticated %}
-                    <a href="{% url 'explore' %}">Explore</a>
-                    <a href="{% url 'notifications' %}">Notifications</a>
-                    <a href="{% url 'profile' user.username %}">Profile</a>
-                    <a href="{% url 'repo_create' %}" class="btn btn-primary">New</a>
-                    <a href="{% url 'settings' %}">Settings</a>
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'explore' %}" class="header-nav-link">
+                        <i class="bi bi-compass"></i>
+                        <span>Explore</span>
+                    </a>
+                    <a href="{% url 'notifications' %}" class="header-nav-link">
+                        <i class="bi bi-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="{% url 'repo_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i>
+                        <span>New</span>
+                    </a>
+                    <div class="header-nav-link">
+                        <div class="avatar">{{ user.username|slice:":2"|upper }}</div>
+                    </div>
                 {% else %}
-                    <a href="{% url 'explore' %}">Explore</a>
-                    <a href="{% url 'login' %}">Sign in</a>
+                    <a href="{% url 'explore' %}" class="header-nav-link">
+                        <i class="bi bi-compass"></i>
+                        <span>Explore</span>
+                    </a>
+                    <a href="{% url 'login' %}" class="btn btn-secondary">Sign in</a>
                     <a href="{% url 'signup' %}" class="btn btn-primary">Sign up</a>
                 {% endif %}
             </nav>
@@ -399,10 +619,11 @@
     <main>
         <div class="{% block container_class %}container{% endblock %}">
             {% if messages %}
-            <div class="messages">
+            <div class="flash-messages">
                 {% for message in messages %}
                 <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
+                    <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' or message.tags == 'danger' %}x-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                    <div>{{ message }}</div>
                 </div>
                 {% endfor %}
             </div>
@@ -413,7 +634,19 @@
     </main>
     
     <footer>
-        <p>&copy; 2025 GitHub Clone. All rights reserved.</p>
+        <div class="footer-container">
+            <div class="footer-copyright">
+                © 2025 GitHub Clone
+            </div>
+            <div class="footer-links">
+                <a href="#">Terms</a>
+                <a href="#">Privacy</a>
+                <a href="#">Security</a>
+                <a href="#">Status</a>
+                <a href="#">Docs</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
     </footer>
     
     {% block extra_js %}{% endblock %}

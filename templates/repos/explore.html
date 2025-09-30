@@ -1,0 +1,80 @@
+<!-- repos/explore.html -->
+{% extends 'base.html' %}
+
+{% block title %}Explore Repositories{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4"><i class="bi bi-compass"></i> Explore Repositories</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <form method="get" class="input-group">
+                <select name="language" class="form-select" style="max-width: 200px;">
+                    <option value="">All languages</option>
+                    {% for lang in languages %}
+                    <option value="{{ lang }}" {% if lang == current_language %}selected{% endif %}>{{ lang }}</option>
+                    {% endfor %}
+                </select>
+                <select name="sort" class="form-select" style="max-width: 150px;">
+                    <option value="stars" {% if current_sort == 'stars' %}selected{% endif %}>Most stars</option>
+                    <option value="forks" {% if current_sort == 'forks' %}selected{% endif %}>Most forks</option>
+                    <option value="updated" {% if current_sort == 'updated' %}selected{% endif %}>Recently updated</option>
+                    <option value="created" {% if current_sort == 'created' %}selected{% endif %}>Recently created</option>
+                </select>
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-filter"></i> Filter
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% for repo in repos %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5 class="card-title">
+                <a href="{% url 'repo_detail' repo.owner.username repo.name %}" class="text-decoration-none">
+                    <i class="bi bi-book"></i> {{ repo.owner.username }}/{{ repo.name }}
+                </a>
+            </h5>
+            {% if repo.description %}
+            <p class="card-text">{{ repo.description }}</p>
+            {% endif %}
+            <div class="d-flex gap-3 text-muted small">
+                {% if repo.language %}
+                <span><span class="badge bg-primary">{{ repo.language }}</span></span>
+                {% endif %}
+                <span><i class="bi bi-star"></i> {{ repo.stars_count }}</span>
+                <span><i class="bi bi-diagram-3"></i> {{ repo.forks_count }}</span>
+                <span>Updated {{ repo.updated_at|timesince }} ago</span>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox fs-1 text-muted"></i>
+        <p class="text-muted mt-3">No repositories found</p>
+    </div>
+    {% endfor %}
+
+    {% if repos.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if repos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ repos.previous_page_number }}&language={{ current_language }}&sort={{ current_sort }}">Previous</a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Page {{ repos.number }} of {{ repos.paginator.num_pages }}</span>
+            </li>
+            {% if repos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ repos.next_page_number }}&language={{ current_language }}&sort={{ current_sort }}">Next</a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

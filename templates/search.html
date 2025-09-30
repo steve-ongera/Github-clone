@@ -1,0 +1,92 @@
+
+<!-- search.html -->
+{% extends 'base.html' %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <h2 class="mb-4"><i class="bi bi-search"></i> Search</h2>
+
+    <form method="get" class="mb-4">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" name="q" value="{{ query }}" placeholder="Search repositories and users..." autofocus>
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+        <div class="btn-group" role="group">
+            <input type="radio" class="btn-check" name="type" id="type_repos" value="repositories" {% if search_type == 'repositories' %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="type_repos">
+                <i class="bi bi-book"></i> Repositories
+            </label>
+            <input type="radio" class="btn-check" name="type" id="type_users" value="users" {% if search_type == 'users' %}checked{% endif %}>
+            <label class="btn btn-outline-primary" for="type_users">
+                <i class="bi bi-people"></i> Users
+            </label>
+        </div>
+    </form>
+
+    {% if query %}
+        {% if search_type == 'repositories' %}
+            {% for repo in results %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'repo_detail' repo.owner.username repo.name %}" class="text-decoration-none">
+                            <i class="bi bi-book"></i> {{ repo.owner.username }}/{{ repo.name }}
+                        </a>
+                    </h5>
+                    {% if repo.description %}
+                    <p class="card-text">{{ repo.description }}</p>
+                    {% endif %}
+                    <div class="d-flex gap-3 text-muted small">
+                        {% if repo.language %}
+                        <span><span class="badge bg-primary">{{ repo.language }}</span></span>
+                        {% endif %}
+                        <span><i class="bi bi-star"></i> {{ repo.stars_count }}</span>
+                        <span><i class="bi bi-diagram-3"></i> {{ repo.forks_count }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="text-center py-5">
+                <i class="bi bi-inbox fs-1 text-muted"></i>
+                <p class="text-muted mt-3">No repositories found for "{{ query }}"</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="row">
+                {% for user in results %}
+                <div class="col-md-6 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center">
+                                {% if user.avatar %}
+                                <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="rounded-circle me-3" style="width: 48px; height: 48px; object-fit: cover;">
+                                {% else %}
+                                <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                                    <i class="bi bi-person text-white"></i>
+                                </div>
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-0">
+                                        <a href="{% url 'profile' user.username %}" class="text-decoration-none">{{ user.username }}</a>
+                                    </h6>
+                                    {% if user.bio %}
+                                    <small class="text-muted">{{ user.bio|truncatewords:10 }}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <i class="bi bi-inbox fs-1 text-muted"></i>
+                    <p class="text-muted mt-3">No users found for "{{ query }}"</p>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,223 @@
+<!-- repos/repo_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}{{ repo.owner.username }}/{{ repo.name }}{% endblock %}
+
+{% block content %}
+<div class="container my-4">
+    <!-- Repository Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="bi bi-book"></i>
+                <a href="{% url 'profile' repo.owner.username %}" class="text-decoration-none">{{ repo.owner.username }}</a>
+                <span class="text-muted">/</span>
+                <strong>{{ repo.name }}</strong>
+                <span class="badge bg-secondary ms-2">{{ repo.visibility }}</span>
+            </h2>
+            {% if repo.description %}
+            <p class="text-muted">{{ repo.description }}</p>
+            {% endif %}
+        </div>
+        
+        {% if user.is_authenticated %}
+        <div class="d-flex gap-2">
+            <form method="post" action="{% url 'watch_repo' repo.owner.username repo.name %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm {% if is_watching %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+                    <i class="bi bi-eye{% if is_watching %}-fill{% endif %}"></i> 
+                    {% if is_watching %}Watching{% else %}Watch{% endif %}
+                    <span class="badge bg-secondary">{{ repo.watchers_count }}</span>
+                </button>
+            </form>
+            
+            <form method="post" action="{% url 'star_repo' repo.owner.username repo.name %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm {% if is_starred %}btn-warning{% else %}btn-outline-secondary{% endif %}">
+                    <i class="bi bi-star{% if is_starred %}-fill{% endif %}"></i> 
+                    {% if is_starred %}Starred{% else %}Star{% endif %}
+                    <span class="badge bg-secondary">{{ repo.stars_count }}</span>
+                </button>
+            </form>
+            
+            <div class="dropdown">
+                <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                    <i class="bi bi-diagram-3"></i> Fork <span class="badge bg-secondary">{{ repo.forks_count }}</span>
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item">
+            <a class="nav-link active" href="{% url 'repo_detail' repo.owner.username repo.name %}">
+                <i class="bi bi-code"></i> Code
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'issue_list' repo.owner.username repo.name %}">
+                <i class="bi bi-exclamation-circle"></i> Issues
+                {% if repo.open_issues_count > 0 %}
+                <span class="badge bg-secondary">{{ repo.open_issues_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'pr_list' repo.owner.username repo.name %}">
+                <i class="bi bi-git"></i> Pull requests
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'release_list' repo.owner.username repo.name %}">
+                <i class="bi bi-tag"></i> Releases
+            </a>
+        </li>
+        {% if user == repo.owner %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'repo_edit' repo.owner.username repo.name %}">
+                <i class="bi bi-gear"></i> Settings
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <!-- Branch Selector -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-git"></i> {{ repo.default_branch }}
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% for branch in branches %}
+                        <li><a class="dropdown-item" href="#">{{ branch.name }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <span class="ms-3 text-muted">{{ branches.count }} branches</span>
+            </div>
+
+            <!-- File Browser Placeholder -->
+            <div class="card mb-3">
+                <div class="card-header bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-folder"></i> Repository files</span>
+                        <small class="text-muted">{{ repo.size|filesizeformat }}</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-0">File browser would be displayed here</p>
+                </div>
+            </div>
+
+            <!-- Recent Commits -->
+            <h5 class="mb-3"><i class="bi bi-clock-history"></i> Recent Commits</h5>
+            {% for commit in recent_commits %}
+            <div class="card mb-2">
+                <div class="card-body py-2">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>{{ commit.message|truncatewords:10 }}</strong>
+                            <div class="text-muted small">
+                                {{ commit.author_name }} committed {{ commit.committed_at|timesince }} ago
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <code class="small">{{ commit.sha|slice:":7" }}</code>
+                            <div class="text-muted small">
+                                <span class="text-success">+{{ commit.additions }}</span>
+                                <span class="text-danger">-{{ commit.deletions }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="card">
+                <div class="card-body text-center text-muted">
+                    <i class="bi bi-inbox fs-3"></i>
+                    <p class="mt-2">No commits yet</p>
+                </div>
+            </div>
+            {% endfor %}
+
+            <!-- README -->
+            {% if repo.description %}
+            <div class="card mt-4">
+                <div class="card-header">
+                    <i class="bi bi-file-text"></i> README.md
+                </div>
+                <div class="card-body">
+                    <h4>{{ repo.name }}</h4>
+                    <p>{{ repo.description }}</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-3">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-3">About</h6>
+                    {% if repo.description %}
+                    <p class="small">{{ repo.description }}</p>
+                    {% endif %}
+                    
+                    {% if repo.homepage %}
+                    <div class="mb-2">
+                        <i class="bi bi-link-45deg"></i>
+                        <a href="{{ repo.homepage }}" target="_blank" class="small">{{ repo.homepage }}</a>
+                    </div>
+                    {% endif %}
+                    
+                    {% if repo.topics %}
+                    <div class="mb-2">
+                        {% for topic in repo.topics %}
+                        <span class="badge bg-info text-dark me-1">{{ topic }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="small text-muted">
+                        <i class="bi bi-star"></i> {{ repo.stars_count }} stars
+                    </div>
+                    <div class="small text-muted">
+                        <i class="bi bi-eye"></i> {{ repo.watchers_count }} watching
+                    </div>
+                    <div class="small text-muted">
+                        <i class="bi bi-diagram-3"></i> {{ repo.forks_count }} forks
+                    </div>
+                </div>
+            </div>
+
+            {% if repo.language %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Languages</h6>
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: 100%"></div>
+                    </div>
+                    <div class="mt-2 small">
+                        <span class="badge bg-primary">{{ repo.language }}</span> 100%
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2">Releases</h6>
+                    <p class="small text-muted mb-0">
+                        <a href="{% url 'release_list' repo.owner.username repo.name %}">View all releases</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
